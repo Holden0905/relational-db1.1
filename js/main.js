@@ -1,7 +1,8 @@
 // js/main.js
 
+// UPDATED: Added handleComponentClick to the import list
+import { renderComponentTable, setupEventListeners, showAddComponentForm, handleComponentClick } from './ui.js';
 import { fetchComponents } from './api.js';
-import { renderComponentTable, setupEventListeners, showAddComponentForm } from './ui.js';
 
 console.log('Component Tracker Initializing...');
 
@@ -12,35 +13,52 @@ let allComponents = [];
  * The main function to start the application.
  */
 async function initializeApp() {
-    // We'll now use our new refresh function to handle the initial load
     await refreshComponentsList();
 
-    // Listen for clicks on the "Add Component" button
     document.getElementById('add-component-btn').addEventListener('click', () => {
         showAddComponentForm();
     });
+
+    // START: Add this new section for the theme toggle
+    const themeCheckbox = document.getElementById('theme-checkbox');
+    const body = document.body;
+
+    // Listen for changes on the checkbox
+    themeCheckbox.addEventListener('change', () => {
+        if (themeCheckbox.checked) {
+            // If checked, add the dark-mode class to the body
+            body.classList.add('dark-mode');
+        } else {
+            // If unchecked, remove it
+            body.classList.remove('dark-mode');
+        }
+    });
+    // END: Add this new section
 }
 
 /**
- * Refreshes the component list, now with a default sort.
+ * Refreshes the component list and loads the first component by default.
  */
 export async function refreshComponentsList() {
-    // 1. Re-fetch the data from the API
+    // 1. Fetch the data
     allComponents = await fetchComponents();
     
-    // 2. THIS IS THE FIX: Apply the default sort before doing anything else.
-    // We sort by 'Drawing' in ascending order using our natural sort logic.
+    // 2. Apply the default sort
     allComponents.sort((a, b) => {
         return a.Component.localeCompare(b.Component, undefined, { numeric: true, sensitivity: 'base' });
     });
 
-    // 3. Set up the search/sort event listeners with the now-sorted list.
+    // 3. Set up the event listeners
     setupEventListeners(allComponents);
 
-    // 4. Render the table. It will now be sorted by default.
+    // 4. Render the table
     renderComponentTable(allComponents);
-}
 
+    // 5. NEW: Automatically load the first component in the list
+    if (allComponents.length > 0) {
+        handleComponentClick(allComponents[0]);
+    }
+}
 
 // Start the application!
 initializeApp();

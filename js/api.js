@@ -179,3 +179,41 @@ export async function addComponent(componentData) {
     
     return { data, error };
 }
+
+// Add these two new functions to the end of js/api.js
+
+/**
+ * Deletes all readings associated with a specific component ID.
+ * @param {number} componentId The ID of the component whose readings will be deleted.
+ */
+export async function deleteReadingsForComponent(componentId) {
+    return await client
+        .from('Readings')
+        .delete()
+        .eq('component_id', componentId);
+}
+
+/**
+ * Deletes a single component by its ID.
+ * @param {number} componentId The ID of the component to delete.
+ */
+export async function deleteComponent(componentId) {
+    return await client
+        .from('Component Table')
+        .delete()
+        .eq('id', componentId);
+}
+
+// Add this new function to the end of js/api.js
+
+/**
+ * Updates an existing component record by its ID.
+ * @param {number} componentId The ID of the component to update.
+ * @param {object} componentData An object with the new data for the component.
+ */
+export async function updateComponent(componentId, componentData) {
+    return await client
+        .from('Component Table')
+        .update(componentData)
+        .eq('id', componentId);
+}

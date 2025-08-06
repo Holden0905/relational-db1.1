@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Component Tracker - Proactive Environmental Services</title>
+    <title>LDAR Database - Proactive Environmental Services</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,6 +13,14 @@
             <img src="Signature.png" alt="Proactive Environmental Services" class="logo">
             <h1>Actiview LDAR</h1>
         </div>
+        <div class="theme-toggle-container">
+            <label class="theme-switch" for="theme-checkbox">
+                <input type="checkbox" id="theme-checkbox" />
+                <div class="slider round"></div>
+            </label>
+            <span>Dark Mode</span>
+        </div>
+        </header>
     </header>
     
     <main>
@@ -39,18 +47,16 @@
                 </select>
                 <button id="add-component-btn" class="btn btn-primary">Add Component</button>
             </div>
-    <table id="components-table">
                 <table id="components-table">
                     <thead>
                         <tr>
                             <th>Drawing</th>
                             <th>Component</th>
                             <th>Unit</th>
-                        </tr>
+                            <th style="width: 120px;">Actions</th> </tr>
                     </thead>
                     <tbody id="components-tbody">
-                        <!-- Component data will be loaded here by JavaScript -->
-                    </tbody>
+                        </tbody>
                 </table>
             </section>
             

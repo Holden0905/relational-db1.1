@@ -152,18 +152,51 @@ export function renderComponentTable(components) {
     // This part is the same as before.
     components.forEach(component => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${component.Drawing}</td><td>${component.Component}</td><td>${component.Unit}</td>`;
+        row.innerHTML = `
+            <td>${component.Drawing}</td>
+            <td>${component.Component}</td>
+            <td>${component.Unit}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-warning btn-sm edit-component-btn" data-component-id="${component.id}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-component-btn" data-component-id="${component.id}">Delete</button>
+                </div>
+            </td>
+        `;
         row.style.cursor = 'pointer';
         row.addEventListener('click', () => handleComponentClick(component));
         tableBody.appendChild(row);
+
+        
     });
+
+    // Add this inside the renderComponentTable function, after the forEach loop
+
+    document.querySelectorAll('.delete-component-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the row's click event from firing
+            const componentId = e.target.dataset.componentId;
+            handleDeleteComponent(componentId);
+        });
+    });
+
+    // Add this inside the renderComponentTable function, after the delete listener
+
+    document.querySelectorAll('.edit-component-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the row's click event from firing
+            const componentId = e.target.dataset.componentId;
+            showEditComponentForm(componentId);
+        });
+    });
+
 }
 
 
 // --- NO CHANGES NEEDED BELOW THIS LINE ---
 // All the functions for handling clicks, PDFs, and readings are complete and correct.
 
-async function handleComponentClick(component) {
+export async function handleComponentClick(component) {
     renderPdfDisplay(component);
     renderComponentDetails(component);
     await renderReadings(component.id);
@@ -283,4 +316,114 @@ async function handleUpdateReading(readingId, componentId) {
     const updatedData = { test_date: document.getElementById('edit-test-date').value, inspector: document.getElementById('edit-inspector').value, reading_value: parseFloat(document.getElementById('edit-reading-value').value), notes: document.getElementById('edit-notes').value || null };
     const { error } = await api.updateReading(readingId, updatedData);
     if (!error) { alert('Reading updated successfully!'); await renderReadings(componentId); }
+}
+
+// Add this new function to the end of js/ui.js
+
+/**
+ * Handles deleting a component and all its associated readings.
+ * @param {number} componentId The ID of the component to delete.
+ */
+async function handleDeleteComponent(componentId) {
+    const confirmation = `Are you sure you want to delete this component? This will also delete ALL of its readings. This action cannot be undone.`;
+    if (!confirm(confirmation)) {
+        return;
+    }
+
+    // 1. Delete all associated readings first
+    const { error: readingsError } = await api.deleteReadingsForComponent(componentId);
+    if (readingsError) {
+        alert('Error deleting associated readings: ' + readingsError.message);
+        return;
+    }
+
+    // 2. Delete the component itself
+    const { error: componentError } = await api.deleteComponent(componentId);
+    if (componentError) {
+        alert('Error deleting component: ' + componentError.message);
+        return;
+    }
+
+    alert('Component and all its readings deleted successfully!');
+    
+    // 3. Clear the main display and refresh the component list
+    document.getElementById('pdf-main-content').innerHTML = '<h2>LDAR Drawing</h2><p>Select a component to view its technical drawing</p>';
+    document.getElementById('details-content').innerHTML = '<p>Select a component to view details</p>';
+    await refreshComponentsList();
+}
+
+// Add these two new functions to the end of js/ui.js
+
+/**
+ * Shows a pre-filled form to edit an existing component.
+ * @param {number} componentId The ID of the component to edit.
+ */
+async function showEditComponentForm(componentId) {
+    // 1. Fetch the component's current data
+    const { data: component, error } = await api.fetchSingleComponent(componentId);
+    if (error) {
+        alert('Could not fetch component details to edit.');
+        return;
+    }
+
+    // 2. Display the form in the main content area, pre-filled with data
+    const mainContent = document.getElementById('pdf-main-content');
+    mainContent.innerHTML = `
+        <h2>Edit Component</h2>
+        <div class="form-container">
+            <form id="edit-component-form">
+                <div class="form-group">
+                    <label for="comp-drawing">Drawing:</label>
+                    <input type="text" id="comp-drawing" class="form-control" required value="${component.Drawing}">
+                </div>
+                <div class="form-group">
+                    <label for="comp-component">Component:</label>
+                    <input type="text" id="comp-component" class="form-control" required value="${component.Component}">
+                </div>
+                <div class="form-group">
+                    <label for="comp-unit">Unit:</label>
+                    <input type="text" id="comp-unit" class="form-control" required value="${component.Unit}">
+                </div>
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" id="cancel-edit-component" class="btn btn-danger" style="margin-left: 10px;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    // 3. Add event listeners for the new form's buttons
+    document.getElementById('edit-component-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleUpdateComponent(componentId);
+    });
+
+    document.getElementById('cancel-edit-component').addEventListener('click', () => {
+        mainContent.innerHTML = '<h2>LDAR Drawing</h2><p>Select a component to view its technical drawing</p>';
+    });
+}
+
+/**
+ * Handles saving the updated component data.
+ * @param {number} componentId The ID of the component being edited.
+ */
+async function handleUpdateComponent(componentId) {
+    // 1. Get the updated data from the form
+    const componentData = {
+        Drawing: document.getElementById('comp-drawing').value,
+        Component: document.getElementById('comp-component').value,
+        Unit: document.getElementById('comp-unit').value
+    };
+
+    // 2. Call the API layer to save the changes
+    const { error } = await api.updateComponent(componentId, componentData);
+
+    // 3. If successful, clear the form and refresh the list
+    if (error) {
+        alert('Error updating component: ' + error.message);
+    } else {
+        alert('Component updated successfully!');
+        document.getElementById('pdf-main-content').innerHTML = '<h2>LDAR Drawing</h2><p>Select a component to view its technical drawing</p>';
+        await refreshComponentsList();
+    }
 }
