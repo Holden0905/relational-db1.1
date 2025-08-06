@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Tracker - Proactive Environmental Services</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="Signature.png" alt="Proactive Environmental Services" class="logo">
+            <h1>Actiview LDAR</h1>
+        </div>
+    </header>
+    
+    <main>
+        <!-- PDF Display Section - Now at the top and full width -->
+        <section class="section pdf-main-display" id="pdf-main-section">
+            <div id="pdf-main-content">
+                <h2>LDAR Drawing</h2>
+                <p>Select a component to view its technical drawing</p>
+            </div>
+        </section>
+        
+        <!-- Components and Details in bottom row -->
+        <div class="bottom-grid">
+            <section class="section" id="components-section">
+            <h2>Components</h2>
+
+            <div class="controls-container" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <input type="text" id="search-input" placeholder="Search components..." class="form-control" style="flex-grow: 1;">
+                <select id="sort-select" class="form-control" style="width: 200px;">
+                    <option value="Drawing.asc">Sort by Drawing (Ascending)</option>
+                    <option value="Drawing.desc">Sort by Drawing (Descending)</option>
+                    <option value="Component.asc">Sort by Component (Ascending)</option>
+                    <option value="Component.desc">Sort by Component (Descending)</option>
+                </select>
+                <button id="add-component-btn" class="btn btn-primary">Add Component</button>
+            </div>
+    <table id="components-table">
+                <table id="components-table">
+                    <thead>
+                        <tr>
+                            <th>Drawing</th>
+                            <th>Component</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="components-tbody">
+                        <!-- Component data will be loaded here by JavaScript -->
+                    </tbody>
+                </table>
+            </section>
+            
+            <section class="section" id="details-section">
+                <h2>Component Details</h2>
+                <div id="details-content">
+                    <p>Select a component to view details</p>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

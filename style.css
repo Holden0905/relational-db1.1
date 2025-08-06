@@ -1,0 +1,353 @@
+/* Proactive Environmental Services - Component Tracker */
+:root {
+    --primary-green: #4A7C59;
+    --light-green: #6B9C7A;
+    --dark-green: #2F4F37;
+    --silver: #C0C0C0;
+    --dark-gray: #333333;
+    --light-gray: #F5F5F5;
+    --white: #FFFFFF;
+    --danger: #D32F2F;
+    --warning: #FF9800;
+    --success: #4CAF50;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+header {
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+    color: var(--white);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    height: 60px;
+    margin-right: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.section {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+h2 {
+    color: var(--primary-green);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 0.5rem;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: var(--primary-green);
+    color: var(--white);
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: var(--light-gray);
+    cursor: pointer;
+}
+
+/* Button Styles */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-green);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-green);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background-color: #B71C1C;
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    color: var(--white);
+}
+
+.btn-warning:hover {
+    background-color: #F57C00;
+}
+
+/* Form Styles */
+.form-container {
+    background-color: var(--light-gray);
+    border: 2px solid var(--primary-green);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-green);
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.2);
+}
+
+/* Reading List Styles */
+.reading-item {
+    background-color: var(--white);
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.reading-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reading-info {
+    margin-bottom: 0.5rem;
+}
+
+.reading-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+
+/* PDF Viewer Styles */
+.pdf-viewer {
+    border: 2px solid var(--primary-green);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.pdf-viewer iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+}
+
+#upload-progress {
+    margin-top: 1rem;
+}
+
+.progress-container {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    padding: 4px;
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary-green), var(--light-green));
+    height: 20px;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Update the main layout */
+main {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* PDF Main Display - Hero section */
+.pdf-main-display {
+    width: 100%;
+    min-height: 500px;
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 2px solid var(--primary-green);
+}
+
+.pdf-main-display h2 {
+    color: var(--primary-green);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    text-align: center;
+    border-bottom: 2px solid var(--light-green);
+    padding-bottom: 0.5rem;
+}
+
+/* PDF Viewer in main section */
+.pdf-main-viewer {
+    width: 100%;
+    height: 600px;
+    border: 1px solid var(--primary-green);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 0;
+}
+
+/* Bottom grid for components and details */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Update existing section styling */
+.section {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Component info banner */
+.component-info-banner {
+    background: linear-gradient(135deg, var(--light-green), var(--primary-green));
+    color: var(--white);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.component-info-banner h3 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* Upload button styling for main PDF section */
+.pdf-upload-main {
+    text-align: center;
+    padding: 0.25rem;
+    margin-top: 0.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pdf-main-viewer {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+    
+    .pdf-main-viewer {
+        height: 300px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
