@@ -217,3 +217,15 @@ export async function updateComponent(componentId, componentData) {
         .update(componentData)
         .eq('id', componentId);
 }
+
+// Add this new function to the end of js/api.js
+
+/**
+ * Inserts an array of new readings into the database in a single operation.
+ * @param {Array<object>} readingsArray - An array of reading objects to insert.
+ */
+export async function addBulkReadings(readingsArray) {
+    return await client
+        .from('Readings')
+        .insert(readingsArray);
+}

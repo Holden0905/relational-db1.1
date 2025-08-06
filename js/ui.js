@@ -7,6 +7,9 @@
 import { refreshComponentsList } from './main.js';
 import * as api from './api.js';
 
+// Add this new variable at the top of js/ui.js
+export let currentlyDisplayedComponents = [];
+
 /**
  * Shows a form to add a new component. This form will appear in the main content area.
  */
@@ -140,6 +143,7 @@ function naturalSort(a, b) {
  * @param {Array} components - An array of component objects to display.
  */
 export function renderComponentTable(components) {
+    currentlyDisplayedComponents = components;
     const tableBody = document.getElementById('components-tbody');
     tableBody.innerHTML = '';
     
@@ -265,18 +269,50 @@ async function handlePdfUpload(componentId) {
 async function renderReadings(componentId) {
     const readingsSection = document.getElementById('readings-section');
     const readings = await api.fetchReadingsForComponent(componentId);
-    let readingsHTML = `<h4>Readings</h4>`;
+    
+    // Start with the common HTML for the header and the two buttons
+    let readingsHTML = `
+        <h4>Readings</h4>
+        <div style="margin-bottom: 10px;">
+            <button id="add-reading-btn" class="btn btn-primary">Add New Reading</button>
+            <button id="import-readings-btn" class="btn" style="margin-left: 10px; background-color: var(--light-green); color: var(--white);">Import CSV</button>
+        </div>
+    `;
+
     if (readings.length === 0) {
-        readingsHTML += `<button id="add-reading-btn" class="btn btn-primary" style="margin-bottom: 10px;">Add New Reading</button><p>No readings found for this component.</p>`;
+        // If there are no readings, just add the "not found" message
+        readingsHTML += `<p>No readings found for this component.</p>`;
     } else {
-        readingsHTML += `<button id="add-reading-btn" class="btn btn-primary" style="margin-bottom: 10px;">Add New Reading</button><div class="readings-list">`;
+        // If there are readings, build the list
+        readingsHTML += `<div class="readings-list">`;
         readings.forEach(reading => {
-            readingsHTML += `<div class="reading-item"><div class="reading-info"><strong>Date:</strong> ${reading.test_date} | <strong>Inspector:</strong> ${reading.inspector} | <strong>Value:</strong> ${reading.reading_value}${reading.notes ? ` | <strong>Notes:</strong> ${reading.notes}` : ''}</div><div class="reading-actions"><button class="btn btn-warning edit-reading-btn" data-reading-id="${reading.id}">Edit</button><button class="btn btn-danger delete-reading-btn" data-reading-id="${reading.id}">Delete</button></div></div>`;
+            readingsHTML += `
+                <div class="reading-item">
+                    <div class="reading-info">
+                        <strong>Date:</strong> ${reading.test_date} | 
+                        <strong>Inspector:</strong> ${reading.inspector} | 
+                        <strong>Value:</strong> ${reading.reading_value}
+                        ${reading.notes ? ` | <strong>Notes:</strong> ${reading.notes}` : ''}
+                    </div>
+                    <div class="reading-actions">
+                        <button class="btn btn-warning edit-reading-btn" data-reading-id="${reading.id}">Edit</button>
+                        <button class="btn btn-danger delete-reading-btn" data-reading-id="${reading.id}">Delete</button>
+                    </div>
+                </div>
+            `;
         });
         readingsHTML += '</div>';
     }
+
+    // Now, render the complete HTML string to the page
     readingsSection.innerHTML = readingsHTML;
+
+    // Finally, attach all the event listeners to the new buttons
     document.getElementById('add-reading-btn').addEventListener('click', () => showAddReadingForm(componentId));
+    
+    // We will wire this button up in the next step!
+    document.getElementById('import-readings-btn').addEventListener('click', () => handleImportReadings(componentId));
+    
     document.querySelectorAll('.delete-reading-btn').forEach(button => {
         button.addEventListener('click', (e) => handleDeleteReading(e.target.dataset.readingId, componentId));
     });
@@ -426,4 +462,78 @@ async function handleUpdateComponent(componentId) {
         document.getElementById('pdf-main-content').innerHTML = '<h2>LDAR Drawing</h2><p>Select a component to view its technical drawing</p>';
         await refreshComponentsList();
     }
+}
+
+// Add this new function to the end of js/ui.js
+
+/**
+ * Handles the CSV import process for readings.
+ * @param {number} componentId The ID of the component to associate the new readings with.
+ */
+function handleImportReadings(componentId) {
+    // 1. Create a hidden file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.csv'; // Only accept CSV files
+
+    // 2. Listen for when the user selects a file
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) {
+            return; // Exit if no file is selected
+        }
+
+        // 3. Use Papa Parse to read the file
+        Papa.parse(file, {
+            header: true, // Treat the first row as headers
+            skipEmptyLines: true,
+            complete: async function(results) {
+                console.log("Parsed CSV data:", results.data);
+
+                // 4. Format the data for Supabase
+                const readingsToUpload = results.data.map(row => {
+                let formattedDate = null;
+
+                // Only try to format the date if the cell is not empty
+                if (row.test_date) {
+                    const dateObject = new Date(row.test_date);
+                    // Check if the date is valid after trying to parse it
+                    if (!isNaN(dateObject)) {
+                        formattedDate = dateObject.toISOString().split('T')[0];
+                    }
+                }
+
+                return {
+                    component_id: componentId,
+                    test_date: formattedDate,
+                    inspector: row.inspector,
+                    reading_value: parseFloat(row.reading_value),
+                    notes: row.notes || null
+                };
+            });
+
+                if (readingsToUpload.length === 0) {
+                    alert('No valid rows found in the CSV file.');
+                    return;
+                }
+
+                // 5. Send the data to the API layer for bulk insertion
+                const { error } = await api.addBulkReadings(readingsToUpload);
+
+                if (error) {
+                    alert('An error occurred during import: ' + error.message);
+                } else {
+                    alert(`Successfully imported ${readingsToUpload.length} readings!`);
+                    // Refresh the list to show the new data
+                    renderReadings(componentId);
+                }
+            },
+            error: function(err) {
+                alert("An error occurred while parsing the CSV: " + err.message);
+            }
+        });
+    };
+
+    // 6. Programmatically click the hidden file input to open the file dialog
+    fileInput.click();
 }
