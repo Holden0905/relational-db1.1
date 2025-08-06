@@ -229,3 +229,77 @@ export async function addBulkReadings(readingsArray) {
         .from('Readings')
         .insert(readingsArray);
 }
+// Add this new function to the end of js/api.js
+
+/**
+ * Processes CSV data, finds corresponding component IDs, and bulk-inserts the readings.
+ * @param {Array<object>} csvData - An array of row objects from Papa Parse.
+ * @returns {object} An object containing the counts of successful and failed imports.
+ */
+export async function processAndImportReadings(csvData) {
+    // 1. Get a list of all unique component names from the CSV file.
+    // e.g., ['001-001', '001-002', '002-001', ...]
+    const componentNamesFromCsv = [...new Set(csvData.map(row => row.component))];
+
+    // 2. Fetch all the components from the database that match these names.
+    // We use .in() to do this in a single, efficient query!
+    const { data: components, error: fetchError } = await client
+        .from('Component Table')
+        .select('id, Component') // We only need the ID and the name
+        .in('Component', componentNamesFromCsv);
+
+    if (fetchError) {
+        console.error('Error fetching components:', fetchError);
+        return { successCount: 0, errorCount: csvData.length, errors: ['Database query failed.'] };
+    }
+
+    // 3. Create our fast "lookup map".
+    // It will look like: { '001-001': 1, '001-002': 2, ... }
+    const componentIdMap = new Map(components.map(c => [c.Component, c.id]));
+
+    const readingsToUpload = [];
+    const failedRows = [];
+
+    // 4. Loop through the original CSV data and prepare it for insertion.
+    for (const row of csvData) {
+        const componentId = componentIdMap.get(row.component);
+
+        if (componentId) {
+            // SUCCESS: We found a matching component ID in our map.
+            let formattedDate = null;
+            if (row.test_date) {
+                const dateObject = new Date(row.test_date);
+                if (!isNaN(dateObject)) {
+                    formattedDate = dateObject.toISOString().split('T')[0];
+                }
+            }
+            
+            readingsToUpload.push({
+                component_id: componentId,
+                test_date: formattedDate,
+                inspector: row.inspector,
+                reading_value: parseFloat(row.reading_value) || 0,
+                notes: row.notes || null
+            });
+        } else {
+            // FAILURE: This component from the CSV doesn't exist in our database.
+            failedRows.push(row.component);
+        }
+    }
+
+    // 5. Bulk-insert all the valid readings we found.
+    if (readingsToUpload.length > 0) {
+        const { error: insertError } = await addBulkReadings(readingsToUpload);
+        if (insertError) {
+            console.error('Error inserting bulk readings:', insertError);
+            return { successCount: 0, errorCount: csvData.length, errors: [insertError.message] };
+        }
+    }
+    
+    // 6. Return a report of what happened.
+    return {
+        successCount: readingsToUpload.length,
+        errorCount: failedRows.length,
+        errors: [...new Set(failedRows)] // Unique list of component names that failed
+    };
+}

@@ -1,7 +1,7 @@
 // js/main.js
 
 // UPDATED: Added handleComponentClick to the import list
-import { renderComponentTable, setupEventListeners, showAddComponentForm, handleComponentClick, currentlyDisplayedComponents } from './ui.js';
+import { renderComponentTable, setupEventListeners, showAddComponentForm, handleComponentClick, currentlyDisplayedComponents, handleGlobalCsvImport } from './ui.js';
 import { fetchComponents } from './api.js';
 
 console.log('Component Tracker Initializing...');
@@ -39,7 +39,11 @@ async function initializeApp() {
             body.classList.remove('dark-mode');
         }
     });
-    // END: Add this new section
+    // Add this line after the other 'addEventListener' calls
+    document.getElementById('import-csv-global-btn').addEventListener('click', () => {
+        handleGlobalCsvImport();
+    });
+    
 }
 
 /**
@@ -109,3 +113,4 @@ function exportToCSV() {
 
 // Start the application!
 initializeApp();
+
