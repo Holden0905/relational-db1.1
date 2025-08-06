@@ -292,7 +292,7 @@ main {
 /* PDF Viewer in main section */
 .pdf-main-viewer {
     width: 100%;
-    height: 600px;
+    height: 80vh;
     border: 1px solid var(--primary-green);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
